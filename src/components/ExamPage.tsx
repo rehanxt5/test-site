@@ -9,6 +9,7 @@ export default function ExamPage() {
   const [statuses, setStatuses] = useState<QuestionStatus[]>(Array(20).fill('unvisited'));
   const [timeLeft, setTimeLeft] = useState(30 * 60);
   const [submitted, setSubmitted] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   // Auto fullscreen when exam starts
   useEffect(() => {
@@ -23,6 +24,21 @@ export default function ExamPage() {
     };
     enterFullscreen();
   }, []);
+
+  // Keep the toggle in sync with the actual fullscreen state (e.g. Esc exits)
+  useEffect(() => {
+    const onChange = () => setIsFullscreen(Boolean(document.fullscreenElement));
+    document.addEventListener('fullscreenchange', onChange);
+    return () => document.removeEventListener('fullscreenchange', onChange);
+  }, []);
+
+  const toggleFullscreen = () => {
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(() => {});
+    } else {
+      document.documentElement.requestFullscreen().catch(() => {});
+    }
+  };
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -171,6 +187,13 @@ export default function ExamPage() {
           <span className={`text-lg font-mono font-bold ${timeLeft < 300 ? 'text-red-500' : 'text-gray-700'}`}>
             {formatTime(timeLeft)}
           </span>
+          <button
+            onClick={toggleFullscreen}
+            className="px-3 py-1.5 border border-gray-200 rounded-md text-sm font-medium text-gray-600 hover:bg-gray-50 transition"
+            title="Toggle fullscreen"
+          >
+            {isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
+          </button>
           <button
             onClick={handleSubmit}
             className="bg-blue-400 text-white px-4 py-1.5 rounded-md text-sm font-medium hover:bg-blue-500 transition"
