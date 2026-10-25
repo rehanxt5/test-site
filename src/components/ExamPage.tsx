@@ -40,6 +40,20 @@ export default function ExamPage() {
     }
   };
 
+  // F9 hotkey toggles fullscreen. Real (trusted) key events satisfy the
+  // user-gesture requirement of requestFullscreen(), so this also works
+  // when the keypress is delivered programmatically at the OS level.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'F9') {
+        e.preventDefault();
+        toggleFullscreen();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
   useEffect(() => {
     const timer = setInterval(() => {
       setTimeLeft(prev => {
